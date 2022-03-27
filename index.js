@@ -14,7 +14,7 @@ const CleanString = (str) => {
     return str;
 }
 
-const throwawayWordArray = ['the', 'and', 'in', 'that', 'so', 'a', 'an', 'in'];
+const throwawayWordArray = ['the', 'and', 'in', 'that', 'so', 'a', 'an', 'in', 'on', 'to', 'of'];
 
 const GetAnalysis = async () => {
     puppeteerExtra.use(stealthPluggin());
@@ -23,7 +23,7 @@ const GetAnalysis = async () => {
 
     await page.setDefaultNavigationTimeout(0);
 
-    const searchTerm = "Search Term Here";
+    const searchTerm = "christmas";
     
     await page.goto("https://www.youtube.com/");
     const searchBar = await page.$('input[id="search"]');
@@ -75,61 +75,30 @@ const GetAnalysis = async () => {
         }
     });
 
-    let first = "";
-    let second = "";
-    let third = "";
-    let fourth = "";
-    let fifth = "";
+    let placeList = ["", "", "", "", ""];
 
-    let max1 = 0;
-    let max2 = 0;
-    let max3 = 0;
-    let max4 = 0;
-    let max5 = 0;
+    let maxList = [0, 0, 0, 0, 0];
 
-    for (let [key, value] of Object.entries(count)) {
-        if(value > max1) { 
-            if(max1 > max2) {
-                second = first;
-                max2 = max1;
+    Object.entries(count).forEach(([key, value]) => {
+        for(var ind = 0; ind < 5; ind++) {
+            if(value > maxList[ind]) {
+                if(ind < 4 && maxList[ind] > maxList[ind + 1]) {
+                    placeList[ind + 1] = placeList[ind];
+                    maxList[ind + 1] = maxList[ind];
+                }
+                placeList[ind] = key;
+                maxList[ind] = value;
+                return;
             }
-            first = key;
-            max1 = value;           
         }
-        else if(value > max2) { 
-            if(max2 > max3) {
-                third = second;
-                max3 = max2;
-            }
-            second = key;
-            max2 = value;        
-        }
-        else if(value > max3) { 
-            if(max3 > max4) {
-                fourth = third;
-                max4 = max3;
-            }
-            third = key;
-            max3 = value;        
-        } else if(value > max4) { 
-            if(max4 > max5) {
-                fifth = fourth;
-                max5 = max4;
-            }
-            fourth = key;
-            max4 = value;        
-        } else if(value > max5) {
-            fifth = key;
-            max5 = value;
-        }
+
+    });
+
+    for(var j = 0; j < 5; j++) {
+        console.log("Number " + (j + 1) + " is " + placeList[j] + " at " + maxList[j]);
     }
 
-    console.log("First: " + first + " at " + max1);
-    console.log("Second: " + second + " at " + max2);
-    console.log("Third: " + third + " at " + max3);
-    console.log("Fourth: " + fourth + " at " + max4);
-    console.log("Fifth: " + fifth + " at " + max5);
-
+    //await browser.close();
 }
 
 GetAnalysis();
