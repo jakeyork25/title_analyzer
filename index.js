@@ -136,23 +136,57 @@ const ConvertRGBToColor = (r, b, g) => {
 
 const GetPixelArray = async (page) => {
     var colorArray = [];
-    var srcArray = [];
-    const imageArray = await page.$x('//ytd-video-renderer/div[1]/ytd-thumbnail/a/yt-img-shadow/img', imageArray => imageArray.map(img => img.getAttribute('src')));
-    for(var i = 0; i < imageArray.length; i++) {
-        console.log(imageArray[i].toString());
-        var src = await imageArray[i].evaluate(el => el.getAttribute("src"));
-        console.log("Source: " + src);
-        srcArray.push(src);
+    var imageArray = [];
+    // for(var y = 0; y < 10; y++) {
+    // await page.evaluate( () => {
+    //     window.scrollBy(0, window.innerHeight * 5);
+    // });
+    // }
+    // for(var x = 0; x < 10; x++) {
+    //     await page.evaluate(() => {
+    //         window.scrollBy(0, -window.innerHeight * 5);
+    //     });
+    // }
+    for(var j = 1; j < 21; j++) {
+        var path = `//ytd-item-section-renderer/div[@id="contents"]/ytd-video-renderer[${j}]/div[1]/ytd-thumbnail/a/yt-img-shadow/img`;
+        await page.waitForXPath(path);
+        let [el] = await page.$x(path);
+        await page.evaluate( () => {
+            window.scrollBy(0, window.innerHeight * 1);
+        });
+        if(j % 6 == 0) await page.waitForTimeout(2000);
+        await page.evaluate((element) => { element.scrollIntoView(); }, el);
+        let text = await el.getProperty('src');
+        let src = await text.jsonValue();
+        src = src + ".png";
+        console.log("Src: " + src);
+        imageArray.push(src);
+        await page.waitForTimeout(200);
     }
-    
-    for(var k = 0; k < srcArray.length; k++) {
-        var src = srcArray[k];
-        getPixels(src + ".png", function(err, pixels) {
+    for(var x = 1; x < 11; x++) {
+        var path = `//ytd-item-section-renderer[2]/div[@id="contents"]/ytd-video-renderer[${x}]/div[1]/ytd-thumbnail/a/yt-img-shadow/img`;
+        await page.waitForXPath(path);
+        let [el] = await page.$x(path);
+        await page.evaluate( () => {
+            window.scrollBy(0, window.innerHeight * 1);
+        });
+        if(j % 6 == 0) await page.waitForTimeout(2000);
+        await page.evaluate((element) => { element.scrollIntoView(); }, el);
+        let text = await el.getProperty('src');
+        let src = await text.jsonValue();
+        src = src + ".png";
+        console.log("Src: " + src);
+        imageArray.push(src);
+        await page.waitForTimeout(200);
+    }
+    console.log("Image array length: " + imageArray.length);
+    for(var i = 0; i < imageArray.length; i++) {
+        let imgSrc = imageArray[i];
+        getPixels(imgSrc, function(err, pixels) {
             if(err) {
                 console.log("Bad image path")
                 return
             }
-    
             var iw = (pixels.shape.slice(0, 1)/10) - 1;
             var ih = (pixels.shape.slice(1, 2)/10) - 1;
             
@@ -167,7 +201,7 @@ const GetPixelArray = async (page) => {
             }
         });
     }
-
+    await page.waitForTimeout(3000);
     console.log("Color array length: " + colorArray.length);
     return colorArray;
 }
@@ -228,7 +262,7 @@ const GetTitleData = async () => {
     const searchTerm = "chainsaw man";
     
     page = await SearchForVideos(page, searchTerm);
-    page = await LoadVideos(page, 1);
+    page = await LoadVideos(page, 0);
 
     console.log("Videos have loaded!");
 
